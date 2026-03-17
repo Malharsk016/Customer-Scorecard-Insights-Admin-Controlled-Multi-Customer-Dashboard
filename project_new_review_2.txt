@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Scorecard & Insights</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    
+    body {
+      background-color: #e6e6da;
+      color: #000;
+    }
+    
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 30px;
+      background-color: #ffffff;
+      border-bottom: 1px solid #ddd;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .logo-section {
+      display: flex;
+      align-items: center;
+    }
+    
+    .bosch-logo {
+      height: 40px;
+      margin-right: 20px;
+    }
+    
+    .site-title {
+      font-size: 36px;
+      font-weight: bold;
+      color: #000;
+    }
+    
+    .action-btn {
+      background-color: #777;
+      color: white;
+      border: none;
+      padding: 10px 40px;
+      border-radius: 25px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    
+    .back-btn {
+      background-color: #777;
+      color: white;
+      border: none;
+      padding: 10px 40px;
+      border-radius: 25px;
+      font-size: 18px;
+      cursor: pointer;
+      margin-right: 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 30px;
+    }
+    
+    .customer-section {
+      background-color: #f2f2f2;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+    }
+    
+    .section-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #000;
+    }
+    
+    .customer-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .customer-card {
+      background-color: white;
+      width: 172px;
+      height: 172px;
+      border: 1px solid #e0e0e0;
+      border-radius: 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      color: #000;
+    }
+    
+    .customer-logo {
+      width: 110px;
+      height: 80px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
+    /* Dashboard images */
+    .dashboard-card img {
+      width: 100%;
+      height: 30vh;
+      min-height: 200px;
+      max-height: 300px;
+      object-fit: contain;
+    }
+   
+    .dashboard-image {
+      width: 90vw;
+      height: 60vh;
+      max-width: 1200px;
+      max-height: 800px;
+      object-fit: contain;
+      display: block;
+      margin: 20px auto;
+    }
+    
+    .customer-name {
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    /* Pages */
+    .page {
+      display: none;
+    }
+    
+    .page.active {
+      display: block;
+    }
+    
+    /* Customer Header */
+    .customer-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .customer-header-logo {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      margin-right: 15px;
+    }
+    
+    /* Main content area */
+    .main-content {
+      margin: 20px 0;
+    }
+    
+    /* Overview Dashboard */
+    .customer-overview {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .customer-name {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    
+    .dashboard-card {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    
+    .dashboard-card img {
+      width: 100%;
+      height: auto;
+    }
+    
+    /* Highlights Section */
+    .highlights {
+      margin: 30px 0;
+    }
+    
+    .highlights h3 {
+      margin-bottom: 15px;
+      font-size: 22px;
+    }
+    
+    .highlight-item {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .highlight-item:before {
+      content: "•";
+      color: #ffcc00;
+      font-size: 24px;
+      margin-right: 10px;
+    }
+    
+    /* Audit Status Section */
+    .audit-status {
+      margin-top: 30px;
+    }
+    
+    .audit-status h3 {
+      margin-bottom: 15px;
+      font-size: 22px;
+    }
+    
+    .audit-numbers {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .audit-stat {
+      flex: 1;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    
+    .without-opl {
+      background-color: #E3F2FD;
+      color: #0066cc;
+    }
+    
+    .with-opl {
+      background-color: #FFF8E1;
+      color: #FF9800;
+    }
+    
+    /* Scorecard Page */
+    .scorecard-filters {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    select {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    
+    .download-btn {
+      margin-left: auto;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    .charts-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .chart-card {
+      flex-basis: calc(33.333% - 20px);
+      background-color: white;
+      border-radius: 5px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    @media (max-width: 992px) {
+      .chart-card {
+        flex-basis: calc(50% - 20px);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .chart-card {
+        flex-basis: 100%;
+      }
+    }
+    
+    /* Reversed navbar layout */
+    .navbar-reversed {
+      flex-direction: row-reverse;
+    }
+  </style>
+</head>
+<body>
+  <!-- Home/Selection Page -->
+  <div class="page active" id="home-page">
+    <div class="navbar">
+      <div class="logo-section">
+        <img src="bosch.jpg" alt="Bosch Logo" class="bosch-logo">
+        <h1 class="site-title">Customer Scorecard & Insights</h1>
+      </div>
+      <button class="action-btn" id="login-btn">Login</button>
+    </div>
+    
+    <div class="container">
+      <div class="customer-section">
+        <h2 class="section-title">IATF customer</h2>
+        <div class="customer-grid">
+          <a href="#" class="customer-card" onclick="showCustomerOverview('General Motors', 'gm.jpeg'); return false;">
+            <img src="gm.jpeg" alt="General Motors Logo" class="customer-logo">
+            <div class="customer-name">General motors</div>
+          </a>
+          <a href="#" class="customer-card" onclick="showCustomerOverview('VW', 'vw.jpeg'); return false;">
+            <img src="vw.jpeg" alt="VW Logo" class="customer-logo">
+            <div class="customer-name">VW</div>
+          </a>
+          <a href="#" class="customer-card" onclick="showCustomerOverview('Stellantis', 'stellantis.jpeg'); return false;">
+            <img src="stellantis.jpeg" alt="Stellantis Logo" class="customer-logo">
+            <div class="customer-name">Stellantis</div>
+          </a>
+          <a href="#" class="customer-card" onclick="showCustomerOverview('Renault', 'renault.jpeg'); return false;">
+            <img src="renault.jpeg" alt="Renault Logo" class="customer-logo">
+            <div class="customer-name">Renault</div>
+          </a>
+        </div>
+      </div>
+      
+      <div class="customer-section">
+        <h2 class="section-title">Non-IATF customer</h2>
+        <div class="customer-grid">
+          <a href="#" class="customer-card" onclick="showCustomerOverview('MSIL', 'msil.jpeg'); return false;">
+            <img src="msil.jpeg" alt="MSIL Logo" class="customer-logo">
+            <div class="customer-name">MSIL</div>
+          </a>
+          <a href="#" class="customer-card" onclick="showCustomerOverview('Honda', 'honda.jpeg'); return false;">
+            <img src="honda.jpeg" alt="Honda Logo" class="customer-logo">
+            <div class="customer-name">Honda</div>
+          </a>
+          <a href="#" class="customer-card" onclick="showCustomerOverview('TVS', 'tvs.png'); return false;">
+            <img src="tvs.png" alt="TVS Logo" class="customer-logo">
+            <div class="customer-name">TVS</div>
+          </a>
+          <a href="#" class="customer-card" onclick="showCustomerOverview('Mazda', 'mazda.png'); return false;">
+            <img src="mazda.png" alt="Mazda Logo" class="customer-logo">
+            <div class="customer-name">Mazda</div>
+          </a>
+          <a href="#" class="customer-card" onclick="showCustomerOverview('Vinfast', 'vinfast.jpeg'); return false;">
+            <img src="vinfast.jpeg" alt="Vinfast Logo" class="customer-logo">
+            <div class="customer-name">Vinfast</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Admin Login Modal -->
+  <div id="admin-login-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:1000;">
+    <div style="background-color:white; width:400px; margin:100px auto; padding:30px; border-radius:5px;">
+      <h2 style="text-align:center; margin-bottom:20px;">Admin Login</h2>
+      <div style="margin-bottom:15px;">
+        <label style="display:block; margin-bottom:5px;">Username</label>
+        <input type="text" id="admin-username" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="display:block; margin-bottom:5px;">Password</label>
+        <input type="password" id="admin-password" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+      </div>
+      <div style="text-align:right;">
+        <button onclick="document.getElementById('admin-login-modal').style.display='none'" style="padding:8px 15px; margin-right:10px; background:#777; color:white; border:none; border-radius:4px;">Cancel</button>
+        <button onclick="handleAdminLogin()" style="padding:8px 15px; background:#0066cc; color:white; border:none; border-radius:4px;">Login</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Customer Overview Page -->
+  <div class="page" id="customer-overview">
+    <div class="navbar">
+      <div class="logo-section">
+        <button class="back-btn" onclick="showPage('home-page')">Back</button>
+        <img src="bosch.jpg" alt="Bosch Logo" class="bosch-logo">
+        <h1 class="site-title">Customer Scorecard & Insights</h1>
+      </div>
+      <button class="action-btn" onclick="showPage('login-page')">Login</button>
+    </div>
+    
+    <div class="container">
+      <div class="customer-overview">
+        <h2 class="customer-name" id="overview-customer-name">MSIL</h2>
+        
+        <div class="main-content">
+          <div class="charts-container">
+            <!-- Scorecard Preview Card -->
+            <div class="dashboard-card" onclick="showPage('customer-scorecard')">
+              <img src="scorebpard.png" alt="Scorecard Preview" class="dashboard-image">
+            </div>
+            
+            <!-- Project Updates Preview Card -->
+            <div class="dashboard-card" onclick="showPage('customer-projects')">
+              <img src="report.png" alt="Project Updates Preview" class="dashboard-image">
+            </div>
+            
+            <!-- Audit Status Preview Card -->
+            <div class="dashboard-card" onclick="showPage('customer-audit')">
+              <img src="audit.png" alt="Audit Status Preview" class="dashboard-image">
+            </div>
+          </div>
+        </div>
+        
+        <div class="highlights">
+          <h3>Highlights</h3>
+          <div class="highlight-item">Supplier Quality award</div>
+          <div class="highlight-item">Awarded for new project such as DA3, CGW</div>
+        </div>
+        
+        <!-- Audit table removed from this page -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Customer Scorecard Page -->
+  <div class="page" id="customer-scorecard">
+    <div class="navbar">
+      <div class="logo-section">
+        <button class="back-btn" onclick="showPage('customer-overview')">Back</button>
+        <img src="bosch.jpg" alt="Bosch Logo" class="bosch-logo">
+        <h1 class="site-title">Customer Scorecard & Insights</h1>
+      </div>
+      <button class="action-btn" onclick="showPage('login-page')">Login</button>
+    </div>
+    
+    <div class="container">
+      <h2 class="customer-name" id="scorecard-customer-name">MSIL Score card</h2>
+      
+      <div class="main-content">
+        <div class="scorecard-filters">
+          <div class="filter-group">
+            <label>Vendor code:</label>
+            <select>
+              <option>B191</option>
+              <option>B342</option>
+              <option>M511</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Year:</label>
+            <select>
+              <option>2024</option>
+              <option>2023</option>
+              <option>2022</option>
+            </select>
+          </div>
+          <button class="download-btn">Download report</button>
+        </div>
+        
+        <div style="margin-top: 20px;">
+          <img src="scorebpard.png" alt="Scorecard Chart" class="dashboard-image">
+        </div>
+        
+        <div style="margin-top: 30px;">
+          <h4>Rating criteria</h4>
+          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin-top: 10px;">
+            <p>Rating criteria details would be displayed here</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Customer Project Updates Page -->
+  <div class="page" id="customer-projects">
+    <div class="navbar">
+      <div class="logo-section">
+        <button class="back-btn" onclick="showPage('customer-overview')">Back</button>
+        <img src="bosch.jpg" alt="Bosch Logo" class="bosch-logo">
+        <h1 class="site-title">Customer Scorecard & Insights</h1>
+      </div>
+      <button class="action-btn" onclick="showPage('login-page')">Login</button>
+    </div>
+    
+    <div class="container">
+      <h2 class="customer-name" id="projects-customer-name">MSIL Project updates</h2>
+      
+      <div class="main-content">
+          <img src="report.png" alt="Project Updates Chart" class="dashboard-image" style="margin-bottom: 20px;">
+        
+        <div style="margin-top: 20px;">
+          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 15px;">
+            <h4>Project: DA3</h4>
+            <p>Status: In Progress</p>
+            <p>Timeline: Q2 2024 - Q4 2024</p>
+          </div>
+          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 15px;">
+            <h4>Project: CGW</h4>
+            <p>Status: Planning Phase</p>
+            <p>Timeline: Q3 2024 - Q1 2025</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Customer Audit Status Page -->
+  <div class="page" id="customer-audit">
+    <div class="navbar">
+      <div class="logo-section">
+        <button class="back-btn" onclick="showPage('customer-overview')">Back</button>
+        <img src="bosch.jpg" alt="Bosch Logo" class="bosch-logo">
+        <h1 class="site-title">Customer Scorecard & Insights</h1>
+      </div>
+      <button class="action-btn" onclick="showPage('login-page')">Login</button>
+    </div>
+    
+    <div class="container">
+      <h2 class="customer-name" id="audit-customer-name">MSIL Audit status</h2>
+      
+      <div class="main-content">
+          <img src="audit.png" alt="Audit Status Chart" class="dashboard-image" style="margin-bottom: 20px;">
+        
+        <div class="audit-status">
+          <p>Total number of audit: 100</p>
+          <div class="audit-numbers">
+            <div class="audit-stat without-opl">
+              <div>Completed without OPL</div>
+              <div class="stat-number">75</div>
+            </div>
+            <div class="audit-stat with-opl">
+              <div>Completed with OPL</div>
+              <div class="stat-number">25</div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 30px;">
+          <h4>Recent Audits</h4>
+          <table style="width:100%; border-collapse: collapse; margin-top: 15px;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Audit Date</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Type</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Status</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #ddd;">03/15/2024</td>
+                <td style="padding: 12px; border-bottom: 1px solid #ddd;">Process Audit</td>
+                <td style="padding: 12px; border-bottom: 1px solid #ddd;">Completed without OPL</td>
+                <td style="padding: 12px; border-bottom: 1px solid #ddd;"><a href="#" style="color: #0066cc;">View</a></td>
+              </tr>
+              <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #ddd;">02/28/2024</td>
+                <td style="padding: 12px; border-bottom: 1px solid #ddd;">Quality Audit</td>
+                <td style="padding: 12px; border-bottom: 1px solid #ddd;">Completed with OPL</td>
+                <td style="padding: 12px; border-bottom: 1px solid #ddd;"><a href="#" style="color: #0066cc;">View</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Editor Modals -->
+  <div id="admin-editor-modal" style="display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div style="background-color: white; margin: 10% auto; padding: 20px; width: 80%; max-width: 700px; border-radius: 5px;">
+      <h3 id="editor-title">Edit Data</h3>
+      
+      <!-- Customers Editor -->
+      <div id="customers-editor" style="display: none;">
+        <div style="margin-bottom: 15px;">
+          <label>Customer Type:</label>
+          <select id="customer-type">
+            <option value="iatf">IATF Customer</option>
+            <option value="non-iatf">Non-IATF Customer</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Customer Name:</label>
+          <input type="text" id="customer-name" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Logo Filename:</label>
+          <input type="text" id="customer-logo" style="width: 100%; padding: 8px;">
+        </div>
+        <button id="add-customer-btn" style="margin-top: 10px;">Add Customer</button>
+        <div id="customers-list" style="margin-top: 20px; max-height: 300px; overflow-y: auto;">
+          <!-- Customer items will be added here dynamically -->
+        </div>
+      </div>
+      
+      <!-- Scorecard Editor -->
+      <div id="scorecard-editor" style="display: none;">
+        <div style="margin-bottom: 15px;">
+          <label>Date:</label>
+          <input type="date" id="scorecard-date" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Year:</label>
+          <input type="number" id="scorecard-year" min="2000" max="2100" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Upload PDF:</label>
+          <input type="file" id="scorecard-pdf" accept=".pdf" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Rating:</label>
+          <select id="scorecard-rating" style="width: 100%; padding: 8px;">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Projects Editor -->
+      <div id="projects-editor" style="display: none;">
+        <div style="margin-bottom: 15px;">
+          <label>Project Name:</label>
+          <input type="text" id="project-name" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Status:</label>
+          <select id="project-status" style="width: 100%; padding: 8px;">
+            <option value="Planning">Planning</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Timeline:</label>
+          <input type="text" id="project-timeline" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Upload Report:</label>
+          <input type="file" id="project-report" accept=".pdf,.doc,.docx" style="width: 100%; padding: 8px;">
+        </div>
+        <div id="projects-list">
+          <!-- Project items will be added here dynamically -->
+        </div>
+        <button id="add-project-btn" style="margin-top: 15px;">Add Project</button>
+      </div>
+      
+      <!-- Audit Editor -->
+      <div id="audit-editor" style="display: none;">
+        <div style="margin-bottom: 15px;">
+          <label>Audit Date:</label>
+          <input type="date" id="audit-date" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Audit Type:</label>
+          <input type="text" id="audit-type" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Status:</label>
+          <select id="audit-status" style="width: 100%; padding: 8px;">
+            <option value="Completed without OPL">Completed without OPL</option>
+            <option value="Completed with OPL">Completed with OPL</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Upload Audit Report:</label>
+          <input type="file" id="audit-report" accept=".pdf,.doc,.docx" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Total Audits:</label>
+          <input type="number" id="audit-total" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Completed without OPL:</label>
+          <input type="number" id="audit-without-opl" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Completed with OPL:</label>
+          <input type="number" id="audit-with-opl" style="width: 100%; padding: 8px;">
+        </div>
+        <h4>Recent Audits</h4>
+        <div id="recent-audits-list">
+          <!-- Recent audit items will be added here dynamically -->
+        </div>
+        <button id="add-audit-btn" style="margin-top: 15px;">Add Audit</button>
+      </div>
+      
+      <div style="margin-top: 20px; text-align: right;">
+        <button id="cancel-edit-btn">Cancel</button>
+        <button id="save-edit-btn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global variable to store current customer
+    let currentCustomer = "";
+    let isAdmin = false;
+    
+    function showPage(pageId) {
+      // Hide all pages
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      
+      // Show selected page
+      document.getElementById(pageId).classList.add('active');
+    }
+    
+    function showCustomerOverview(customerName, logoSrc) {
+      // Set current customer
+      currentCustomer = customerName;
+      
+      // Update all customer name displays
+      document.getElementById('overview-customer-name').textContent = customerName;
+      document.getElementById('scorecard-customer-name').textContent = customerName + " Score card";
+      document.getElementById('projects-customer-name').textContent = customerName + " Project updates";
+      document.getElementById('audit-customer-name').textContent = customerName + " Audit status";
+      
+      // Update edit buttons visibility based on admin status
+      updateUIForUserRole();
+      
+      // Show customer overview
+      showPage('customer-overview');
+      
+      // Load data from storage for this customer
+      loadCustomerData(customerName);
+    }
+
+    // Handle admin login
+    function handleAdminLogin() {
+      const username = document.getElementById('admin-username').value;
+      const password = document.getElementById('admin-password').value;
+      
+      if(username === "admin" && password === "admin123") {
+        isAdmin = true;
+        document.getElementById('admin-login-modal').style.display = 'none';
+        document.getElementById('login-btn').textContent = 'Logout (Admin)';
+        document.getElementById('login-btn').onclick = logout;
+        updateUIForUserRole();
+      } else {
+        alert("Invalid admin credentials");
+      }
+    }
+
+    // Setup login button
+    document.getElementById('login-btn').onclick = function() {
+      if(!isAdmin) {
+        document.getElementById('admin-login-modal').style.display = 'block';
+      }
+    };
+
+    // Update UI elements based on user role
+    function updateUIForUserRole() {
+      const adminElements = document.querySelectorAll('.admin-only');
+      adminElements.forEach(el => {
+        el.style.display = isAdmin ? 'block' : 'none';
+      });
+      
+      // Change login button to logout if logged in
+      const loginButtons = document.querySelectorAll('.action-btn');
+      loginButtons.forEach(btn => {
+        if(isAdmin) {
+          btn.textContent = 'Logout (Admin)';
+          btn.onclick = function() { logout(); };
+        } else {
+          btn.textContent = 'Login';
+          btn.onclick = function() { showPage('login-page'); };
+        }
+      });
+    }
+
+    // Logout function
+    function logout() {
+      isAdmin = false;
+      updateUIForUserRole();
+      showPage('home-page');
+    }
+
+    // Initialize customer data if not exists
+    function initializeCustomerData() {
+      if(!localStorage.getItem('customerData')) {
+        const initialData = {
+          'General Motors': {
+            scorecard: {
+              rating: 'A',
+              details: 'Standard performance metrics are good'
+            },
+            projects: [
+              {name: 'Project X', status: 'In Progress', timeline: 'Q1 2024 - Q3 2024'},
+              {name: 'Project Y', status: 'Planning', timeline: 'Q3 2024 - Q1 2025'}
+            ],
+            audit: {
+              total: 80,
+              withoutOPL: 65,
+              withOPL: 15,
+              recent: [
+                {date: '03/10/2024', type: 'Process Audit', status: 'Completed without OPL'}
+              ]
+            }
+          }
+        };
+        
+        localStorage.setItem('customerData', JSON.stringify(initialData));
+      }
+    }
+
+    // Save customer data (for admin use)
+    function saveCustomerData(customerName, section, data) {
+      if(!isAdmin) return false;
+      
+      const allData = JSON.parse(localStorage.getItem('customerData') || '{}');
+      
+      if(!allData[customerName]) {
+        allData[customerName] = {};
+      }
+      
+      allData[customerName][section] = data;
+      localStorage.setItem('customerData', JSON.stringify(allData));
+      return true;
+    }
+
+    // Retrieve customer data
+    function getCustomerData(customerName, section) {
+      const allData = JSON.parse(localStorage.getItem('customerData') || '{}');
+      
+      if(allData[customerName] && allData[customerName][section]) {
+        return allData[customerName][section];
+      }
+      
+      return null;
+    }
+
+    // Load customer data into the UI
+    function loadCustomerData(customerName) {
+      // Load scorecard data
+      const scorecardData = getCustomerData(customerName, 'scorecard');
+      if(scorecardData) {
+        // Update scorecard UI with the data
+        // This would update the scorecard visualization or text
+      }
+      
+      // Load project data
+      const projectsData = getCustomerData(customerName, 'projects');
+      if(projectsData) {
+        // Update projects UI with the data
+        const projectsContainer = document.querySelector('#customer-projects .main-content');
+        let projectsHTML = '';
+        
+        projectsData.forEach(project => {
+          projectsHTML += `
+            <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 15px;">
+              <h4>Project: ${project.name}</h4>
+              <p>Status: ${project.status}</p>
+              <p>Timeline: ${project.timeline}</p>
+            </div>
+          `;
+        });
+        
+        // Insert after the image
+        const projectImage = projectsContainer.querySelector('img');
+        if(projectImage) {
+          projectImage.insertAdjacentHTML('afterend', projectsHTML);
+        }
+      }
+      
+      // Load audit data
+      const auditData = getCustomerData(customerName, 'audit');
+      if(auditData) {
+        // Update audit UI with the data
+        if(auditData.total) {
+          document.querySelector('.audit-status p').textContent = `Total number of audit: ${auditData.total}`;
+        }
+        
+        if(auditData.withoutOPL) {
+          document.querySelector('.without-opl .stat-number').textContent = auditData.withoutOPL;
+        }
+        
+        if(auditData.withOPL) {
+          document.querySelector('.with-opl .stat-number').textContent = auditData.withOPL;
+        }
+        
+        // Update recent audits table
+        if(auditData.recent && auditData.recent.length > 0) {
+          const tbody = document.querySelector('#customer-audit table tbody');
+          tbody.innerHTML = '';
+          
+          auditData.recent.forEach(audit => {
+            const row = `
+              <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #ddd;">${audit.date}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #ddd;">${audit.type}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #ddd;">${audit.status}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #ddd;"><a href="#" style="color: #0066cc;">View</a></td>
+              </tr>
+            `;
+            tbody.innerHTML += row;
+          });
+        }
+      }
+    }
+
+    // Add edit functionality for admin
+    function showAdminEditor(section) {
+      if(!isAdmin) return;
+      
+      const customerName = currentCustomer;
+      const data = getCustomerData(customerName, section);
+      
+      // Show the appropriate editor based on section
+      switch(section) {
+        case 'customers':
+          showCustomersEditor();
+          break;
+        case 'scorecard':
+          showScorecardEditor(customerName, data);
+          break;
+        case 'projects':
+          showProjectsEditor(customerName, data);
+          break;
+        case 'audit':
+          showAuditEditor(customerName, data);
+          break;
+      }
+    }
+
+    // Show customers editor
+    function showCustomersEditor() {
+      document.getElementById('editor-title').textContent = 'Edit Customers';
+      
+      // Show customers editor, hide others
+      document.getElementById('customers-editor').style.display = 'block';
+      document.getElementById('scorecard-editor').style.display = 'none';
+      document.getElementById('projects-editor').style.display = 'none';
+      document.getElementById('audit-editor').style.display = 'none';
+      
+      // Load existing customers
+      loadCustomersList();
+      
+      // Setup add customer button
+      document.getElementById('add-customer-btn').onclick = function() {
+        const type = document.getElementById('customer-type').value;
+        const name = document.getElementById('customer-name').value;
+        const logo = document.getElementById('customer-logo').value;
+        
+        if(name && logo) {
+          addCustomer(type, name, logo);
+          document.getElementById('customer-name').value = '';
+          document.getElementById('customer-logo').value = '';
+          loadCustomersList();
+        }
+      };
+      
+      // Show modal
+      document.getElementById('admin-editor-modal').style.display = 'block';
+    }
+
+    // Load customers list
+    function loadCustomersList() {
+      const listContainer = document.getElementById('customers-list');
+      listContainer.innerHTML = '';
+      
+      const allData = JSON.parse(localStorage.getItem('customerData') || '{}');
+      
+      // Add IATF customers
+      const iatfSection = document.querySelector('#home-page .customer-section:nth-child(1) .customer-grid');
+      const iatfCustomers = Array.from(iatfSection.querySelectorAll('.customer-card')).map(card => ({
+        name: card.querySelector('.customer-name').textContent,
+        logo: card.querySelector('.customer-logo').src.split('/').pop()
+      }));
+      
+      // Add Non-IATF customers
+      const nonIatfSection = document.querySelector('#home-page .customer-section:nth-child(2) .customer-grid');
+      const nonIatfCustomers = Array.from(nonIatfSection.querySelectorAll('.customer-card')).map(card => ({
+        name: card.querySelector('.customer-name').textContent,
+        logo: card.querySelector('.customer-logo').src.split('/').pop()
+      }));
+      
+      // Add to list
+      iatfCustomers.forEach(customer => {
+        addCustomerToEditorList('iatf', customer.name, customer.logo);
+      });
+      
+      nonIatfCustomers.forEach(customer => {
+        addCustomerToEditorList('non-iatf', customer.name, customer.logo);
+      });
+    }
+
+    // Add customer to editor list
+    function addCustomerToEditorList(type, name, logo) {
+      const listContainer = document.getElementById('customers-list');
+      
+      const item = document.createElement('div');
+      item.style.display = 'flex';
+      item.style.justifyContent = 'space-between';
+      item.style.alignItems = 'center';
+      item.style.padding = '10px';
+      item.style.borderBottom = '1px solid #eee';
+      
+      item.innerHTML = `
+        <div>
+          <strong>${name}</strong> (${type === 'iatf' ? 'IATF' : 'Non-IATF'})<br>
+          <small>Logo: ${logo}</small>
+        </div>
+        <button class="remove-customer-btn" data-name="${name}">Remove</button>
+      `;
+      
+      listContainer.appendChild(item);
+      
+      // Add remove handler
+      item.querySelector('.remove-customer-btn').onclick = function() {
+        removeCustomer(name);
+        loadCustomersList();
+      };
+    }
+
+    // Add new customer
+    function addCustomer(type, name, logo) {
+      const section = type === 'iatf' ? 
+        document.querySelector('#home-page .customer-section:nth-child(1) .customer-grid') :
+        document.querySelector('#home-page .customer-section:nth-child(2) .customer-grid');
+      
+      const card = document.createElement('a');
+      card.className = 'customer-card';
+      card.href = '#';
+      card.onclick = function() { showCustomerOverview(name, logo); return false; };
+      
+      card.innerHTML = `
+        <img src="${logo}" alt="${name} Logo" class="customer-logo">
+        <div class="customer-name">${name}</div>
+      `;
+      
+      section.appendChild(card);
+    }
+
+    // Remove customer
+    function removeCustomer(name) {
+      // Remove from both sections
+      const cards = document.querySelectorAll('.customer-card');
+      cards.forEach(card => {
+        if(card.querySelector('.customer-name').textContent === name) {
+          card.remove();
+        }
+      });
+      
+      // Remove from storage
+      const allData = JSON.parse(localStorage.getItem('customerData') || '{}');
+      delete allData[name];
+      localStorage.setItem('customerData', JSON.stringify(allData));
+    }
+
+    // Show scorecard editor
+    function showScorecardEditor(customerName, data) {
+      document.getElementById('editor-title').textContent = `Edit ${customerName} Scorecard`;
+      
+      // Show scorecard editor, hide others
+      document.getElementById('scorecard-editor').style.display = 'block';
+      document.getElementById('projects-editor').style.display = 'none';
+      document.getElementById('audit-editor').style.display = 'none';
+      
+      // Populate with existing data
+      if(data) {
+        document.getElementById('scorecard-date').value = data.date || '';
+        document.getElementById('scorecard-year').value = data.year || '';
+        document.getElementById('scorecard-rating').value = data.rating || 'A';
+      }
+      
+      // Setup save handler
+      document.getElementById('save-edit-btn').onclick = function() {
+        const updatedData = {
+          date: document.getElementById('scorecard-date').value,
+          year: document.getElementById('scorecard-year').value,
+          rating: document.getElementById('scorecard-rating').value,
+          pdfFile: document.getElementById('scorecard-pdf').files[0]?.name || ''
+        };
+        
+        saveCustomerData(customerName, 'scorecard', updatedData);
+        closeEditor();
+        loadCustomerData(customerName); // Refresh displayed data
+      };
+      
+      // Show modal
+      document.getElementById('admin-editor-modal').style.display = 'block';
+    }
+
+    // Close editor modal
+    function closeEditor() {
+      document.getElementById('admin-editor-modal').style.display = 'none';
+    }
+
+    // Show projects editor
+    function showProjectsEditor(customerName, data) {
+      document.getElementById('editor-title').textContent = `Edit ${customerName} Projects`;
+      
+      // Show projects editor, hide others
+      document.getElementById('projects-editor').style.display = 'block';
+      document.getElementById('scorecard-editor').style.display = 'none';
+      document.getElementById('audit-editor').style.display = 'none';
+      
+      // Clear projects list
+      document.getElementById('projects-list').innerHTML = '';
+      
+      // Populate with existing data
+      if(data && data.length > 0) {
+        data.forEach(project => {
+          addProjectToEditor(project);
+        });
+      }
+      
+      // Setup add project button
+      document.getElementById('add-project-btn').onclick = function() {
+        const name = document.getElementById('project-name').value;
+        const status = document.getElementById('project-status').value;
+        const timeline = document.getElementById('project-timeline').value;
+        const reportFile = document.getElementById('project-report').files[0]?.name || '';
+        
+        if(name && status && timeline) {
+          const project = {
+            name,
+            status,
+            timeline,
+            reportFile
+          };
+          addProjectToEditor(project);
+          
+          // Clear inputs
+          document.getElementById('project-name').value = '';
+          document.getElementById('project-status').value = 'Planning';
+          document.getElementById('project-timeline').value = '';
+          document.getElementById('project-report').value = '';
+        }
+      };
+      
+      // Setup save handler
+      document.getElementById('save-edit-btn').onclick = function() {
+        const projects = [];
+        const projectItems = document.getElementById('projects-list').children;
+        
+        for(let i = 0; i < projectItems.length; i++) {
+          const item = projectItems[i];
+          projects.push({
+            name: item.dataset.name,
+            status: item.dataset.status,
+            timeline: item.dataset.timeline,
+            reportFile: item.dataset.reportFile
+          });
+        }
+        
+        saveCustomerData(customerName, 'projects', projects);
+        closeEditor();
+        loadCustomerData(customerName);
+      };
+      
+      // Show modal
+      document.getElementById('admin-editor-modal').style.display = 'block';
+    }
+    
+    // Add project to editor list
+    function addProjectToEditor(project) {
+      const list = document.getElementById('projects-list');
+      const item = document.createElement('div');
+      item.className = 'project-item';
+      item.dataset.name = project.name;
+      item.dataset.status = project.status;
+      item.dataset.timeline = project.timeline;
+      item.dataset.reportFile = project.reportFile;
+      
+      item.innerHTML = `
+        <div style="margin-bottom: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
+          <strong>${project.name}</strong><br>
+          Status: ${project.status}<br>
+          Timeline: ${project.timeline}<br>
+          Report: ${project.reportFile || 'None'}
+          <button onclick="this.parentElement.parentElement.remove()" style="float: right;">Remove</button>
+        </div>
+      `;
+      
+      list.appendChild(item);
+    }
+    
+    // Show audit editor
+    function showAuditEditor(customerName, data) {
+      document.getElementById('editor-title').textContent = `Edit ${customerName} Audits`;
+      
+      // Show audit editor, hide others
+      document.getElementById('audit-editor').style.display = 'block';
+      document.getElementById('scorecard-editor').style.display = 'none';
+      document.getElementById('projects-editor').style.display = 'none';
+      
+      // Clear recent audits list
+      document.getElementById('recent-audits-list').innerHTML = '';
+      
+      // Populate with existing data
+      if(data) {
+        document.getElementById('audit-total').value = data.total || '';
+        document.getElementById('audit-without-opl').value = data.withoutOPL || '';
+        document.getElementById('audit-with-opl').value = data.withOPL || '';
+        
+        if(data.recent && data.recent.length > 0) {
+          data.recent.forEach(audit => {
+            addAuditToEditor(audit);
+          });
+        }
+      }
+      
+      // Setup add audit button
+      document.getElementById('add-audit-btn').onclick = function() {
+        const date = document.getElementById('audit-date').value;
+        const type = document.getElementById('audit-type').value;
+        const status = document.getElementById('audit-status').value;
+        const reportFile = document.getElementById('audit-report').files[0]?.name || '';
+        
+        if(date && type && status) {
+          const audit = {
+            date,
+            type,
+            status,
+            reportFile
+          };
+          addAuditToEditor(audit);
+          
+          // Clear inputs
+          document.getElementById('audit-date').value = '';
+          document.getElementById('audit-type').value = '';
+          document.getElementById('audit-status').value = 'Completed without OPL';
+          document.getElementById('audit-report').value = '';
+        }
+      };
+      
+      // Setup save handler
+      document.getElementById('save-edit-btn').onclick = function() {
+        const auditData = {
+          total: document.getElementById('audit-total').value,
+          withoutOPL: document.getElementById('audit-without-opl').value,
+          withOPL: document.getElementById('audit-with-opl').value,
+          recent: []
+        };
+        
+        const auditItems = document.getElementById('recent-audits-list').children;
+        for(let i = 0; i < auditItems.length; i++) {
+          const item = auditItems[i];
+          auditData.recent.push({
+            date: item.dataset.date,
+            type: item.dataset.type,
+            status: item.dataset.status,
+            reportFile: item.dataset.reportFile
+          });
+        }
+        
+        saveCustomerData(customerName, 'audit', auditData);
+        closeEditor();
+        loadCustomerData(customerName);
+      };
+      
+      // Show modal
+      document.getElementById('admin-editor-modal').style.display = 'block';
+    }
+    
+    // Add audit to editor list
+    function addAuditToEditor(audit) {
+      const list = document.getElementById('recent-audits-list');
+      const item = document.createElement('div');
+      item.className = 'audit-item';
+      item.dataset.date = audit.date;
+      item.dataset.type = audit.type;
+      item.dataset.status = audit.status;
+      item.dataset.reportFile = audit.reportFile;
+      
+      item.innerHTML = `
+        <div style="margin-bottom: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
+          <strong>${audit.date}</strong><br>
+          Type: ${audit.type}<br>
+          Status: ${audit.status}<br>
+          Report: ${audit.reportFile || 'None'}
+          <button onclick="this.parentElement.parentElement.remove()" style="float: right;">Remove</button>
+        </div>
+      `;
+      
+      list.appendChild(item);
+    }
+    
+    // Initialize app
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeCustomerData();
+      
+      // Setup cancel button
+      document.getElementById('cancel-edit-btn').onclick = closeEditor;
+      
+      // Add admin edit buttons to each section
+      const sections = ['customers', 'scorecard', 'projects', 'audit'];
+      
+      // Add edit buttons to all pages
+      sections.forEach(section => {
+        const pageId = section === 'customers' ? 'home-page' : `customer-${section}`;
+        const page = document.getElementById(pageId);
+        
+        if(page) {
+          const container = page.querySelector('.container');
+          const editButton = document.createElement('button');
+          editButton.textContent = section === 'customers' ? 'Edit Customers' : 'Edit Data';
+          editButton.className = 'admin-only download-btn';
+          editButton.style.display = 'none';
+          if(section === 'customers') {
+            editButton.style.margin = '20px 0';
+          }
+          editButton.onclick = function() { showAdminEditor(section); };
+          
+          if(section === 'customers') {
+            container.insertBefore(editButton, container.firstChild);
+          } else {
+            const h2 = container.querySelector('h2');
+            if(h2) {
+              h2.after(editButton);
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

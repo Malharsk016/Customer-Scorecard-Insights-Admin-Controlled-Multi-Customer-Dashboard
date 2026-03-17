@@ -1,0 +1,901 @@
+// Initialize customer data if not exists
+    function initializeCustomerData() {
+      try {
+        if(!localStorage.getItem('customerData')) {
+          const initialData = {
+            'General Motors': {
+              pdf: null,
+              scorecard: {
+                rating: 'A',
+                details: 'Standard performance metrics are good'
+              },
+              projects: [
+                {name: 'Project X', status: 'In Progress', timeline: 'Q1 2024 - Q3 2024'},
+                {name: 'Project Y', status: 'Planning', timeline: 'Q3 2024 - Q1 2025'}
+              ],
+              audit: {
+                total: 80,
+                withoutOPL: 65,
+                withOPL: 15,
+                recent: [
+                  {date: '03/10/2024', type: 'Process Audit', status: 'Completed without OPL'}
+                ]
+              }
+            }
+          };
+          
+          localStorage.setItem('customerData', JSON.stringify(initialData));
+        }
+      } catch (e) {
+        console.error('Error initializing customer data:', e);
+        // Fallback to in-memory storage if localStorage fails
+        if (!window.customerDataFallback) {
+          window.customerDataFallback = {};
+        }
+      }
+    }
+
+    // Add PDF to customer data
+    function addCustomerPDF(customerName, pdfFile) {
+      const allData = JSON.parse(localStorage.getItem('customerData') || '{}');
+      
+      if(!allData[customerName]) {
+        allData[customerName] = {};
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        allData[customerName].pdf = {
+          name: pdfFile.name,
+          data: e.target.result.split(',')[1],
+          lastUpdated: new Date().toISOString()
+        };
+        localStorage.setItem('customerData', JSON.stringify(allData));
+        alert(`PDF uploaded for ${customerName}`);
+      };
+      reader.readAsDataURL(pdfFile);
+    }
+
+    // Show PDF upload modal for customer
+    function showPDFUploadModal(customerName) {
+      const modal = document.createElement('div');
+      modal.style.position = 'fixed';
+      modal.style.top = '0';
+      modal.style.left = '0';
+      modal.style.width = '100%';
+      modal.style.height = '100%';
+      modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      modal.style.zIndex = '1000';
+      modal.style.display = 'flex';
+      modal.style.justifyContent = 'center';
+      modal.style.alignItems = 'center';
+      
+      modal.innerHTML = `
+        <div style="background: white; padding: 20px; border-radius: 5px; width: 400px;">
+          <h3>Upload PDF for ${customerName}</h3>
+          <input type="file" id="customer-pdf-upload" accept=".pdf" style="margin: 10px 0;">
+          <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+            <button onclick="this.parentElement.parentElement.parentElement.remove()" style="margin-right: 10px;">Cancel</button>
+            <button onclick="uploadCustomerPDF('${customerName}')">Upload</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+    }
+
+    // Upload PDF for customer
+    function uploadCustomerPDF(customerName) {
+      const fileInput = document.getElementById('customer-pdf-upload');
+      if(fileInput.files.length > 0) {
+        addCustomerPDF(customerName, fileInput.files[0]);
+        document.querySelector('div[style*="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);"]').remove();
+      } else {
+        alert('Please select a PDF file');
+      }
+    }
+
+    // Save customer data (for admin use)
+    function saveCustomerData(customerName, section, data) {
+      if(!isAdmin) return false;
+      
+      const allData = JSON.parse(localStorage.getItem('customerData') || '{}');
+      
+      if(!allData[customerName]) {
+        allData[customerName] = {};
+      }
+      
+      // Handle PDF file storage
+      if(section === 'projects' || section === 'audit') {
+        const fileInput = document.getElementById(`${section}-pdf`);
+        if(fileInput && fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            data.pdfData = e.target.result;
+            data.pdfFileName = file.name;
+            data.lastUpdated = new Date().toISOString();
+            
+            allData[customerName][section] = data;
+            localStorage.setItem('customerData', JSON.stringify(allData));
+          };
+          reader.readAsDataURL(file);
+          return true;
+        }
+      }
+      
+      allData[customerName][section] = data;
+      localStorage.setItem('customerData', JSON.stringify(allData));
+      return true;
+    }
+
+    // Retrieve customer data
+    function getCustomerData(customerName, section) {
+      const allData = JSON.parse(localStorage.getItem('customerData') || '{}');
+      
+      if(allData[customerName] && allData[customerName][section]) {
+        return allData[customerName][section];
+      }
+      
+      return null;
+    }
+
+    // Load customer data into the UI
+    function loadCustomerData(customerName) {
+      // (Keep your existing code)
+      
+      // Add these sections to update UI based on uploaded files:
+      
+      // Check for scorecard PDF
+      const scorecardData = getCustomerData(customerName, 'scorecard');
+      if(scorecardData && scorecardData.pdfFileName) {
+        // Update UI to show the PDF was uploaded
+        const scorecardInfo = document.createElement('div');
+        scorecardInfo.className = 'file-info';
+        scorecardInfo.innerHTML = `
+          <p style="text-align:center; background:#f5f5f5; padding:10px; border-radius:4px; margin-top:15px;">
+            <strong>Current Scorecard:</strong> ${scorecardData.pdfFileName}<br>
+            <small>Updated: ${new Date(scorecardData.lastUpdated).toLocaleDateString()}</small>
+            <button onclick="viewPDF('${customerName}', 'scorecard')" style="margin-left:10px; padding:2px 5px; background:#0066cc; color:white; border:none; border-radius:3px;">View</button>
+            <button onclick="downloadPDF('${customerName}', 'scorecard')" style="margin-left:5px; padding:2px 5px; background:#4CAF50; color:white; border:none; border-radius:3px;">Download</button>
+          </p>
+        `;
+        
+        const scorecardContainer = document.querySelector('#customer-scorecard .main-content');
+        const existingInfo = scorecardContainer.querySelector('.file-info');
+        if(existingInfo) existingInfo.remove();
+        scorecardContainer.appendChild(scorecardInfo);
+      }
+      
+      // Check for project reports
+      const projectsData = getCustomerData(customerName, 'projects');
+      if(projectsData && projectsData.pdfFileName) {
+        // Update UI to show the project report
+        const projectInfo = document.createElement('div');
+        projectInfo.className = 'file-info';
+        projectInfo.innerHTML = `
+          <p style="text-align:center; background:#f5f5f5; padding:10px; border-radius:4px; margin-top:15px;">
+            <strong>Project Update Report:</strong> ${projectsData.pdfFileName}<br>
+            <small>Updated: ${new Date(projectsData.lastUpdated).toLocaleDateString()}</small>
+            <button onclick="viewPDF('${customerName}', 'projects')" style="margin-left:10px; padding:2px 5px; background:#0066cc; color:white; border:none; border-radius:3px;">View</button>
+            <button onclick="downloadPDF('${customerName}', 'projects')" style="margin-left:5px; padding:2px 5px; background:#4CAF50; color:white; border:none; border-radius:3px;">Download</button>
+          </p>
+        `;
+        
+        const projectsContainer = document.querySelector('#customer-projects .main-content');
+        const existingInfo = projectsContainer.querySelector('.file-info');
+        if(existingInfo) existingInfo.remove();
+        projectsContainer.appendChild(projectInfo);
+      }
+      
+      // Check for audit reports
+      const auditData = getCustomerData(customerName, 'audit');
+      if(auditData && auditData.pdfFileName) {
+        // Update UI to show the audit report
+        const auditInfo = document.createElement('div');
+        auditInfo.className = 'file-info';
+        auditInfo.innerHTML = `
+          <p style="text-align:center; background:#f5f5f5; padding:10px; border-radius:4px; margin-top:15px;">
+            <strong>Audit Status Report:</strong> ${auditData.pdfFileName}<br>
+            <small>Updated: ${new Date(auditData.lastUpdated).toLocaleDateString()}</small>
+            <button onclick="viewPDF('${customerName}', 'audit')" style="margin-left:10px; padding:2px 5px; background:#0066cc; color:white; border:none; border-radius:3px;">View</button>
+            <button onclick="downloadPDF('${customerName}', 'audit')" style="margin-left:5px; padding:2px 5px; background:#4CAF50; color:white; border:none; border-radius:3px;">Download</button>
+          </p>
+        `;
+        
+        const auditContainer = document.querySelector('#customer-audit .main-content');
+        const existingInfo = auditContainer.querySelector('.file-info');
+        if(existingInfo) existingInfo.remove();
+        auditContainer.appendChild(auditInfo);
+      }
+    }
+
+    // View PDF in new tab
+    function viewPDF(customerName, section) {
+      const data = getCustomerData(customerName, section);
+      if(data && data.pdfData) {
+        const win = window.open();
+        win.document.write('<iframe width="100%" height="100%" src="' + data.pdfData + '"></iframe>');
+      }
+    }
+
+    // Download PDF
+    function downloadPDF(customerName, section) {
+      const data = getCustomerData(customerName, section);
+      if(data && data.pdfData && data.pdfFileName) {
+        const link = document.createElement('a');
+        link.href = data.pdfData;
+        link.download = data.pdfFileName;
+        link.click();
+      }
+    }
+
+    // Add edit functionality for admin
+    function showAdminEditor(section) {
+      if(!isAdmin) return;
+      
+      const customerName = currentCustomer;
+      const data = getCustomerData(customerName, section);
+      
+      // Show the appropriate editor based on section
+      switch(section) {
+        case 'customers':
+          showCustomersEditor();
+          break;
+        case 'scorecard':
+          showScorecardEditor(customerName, data);
+          break;
+        case 'projects':
+          showProjectsEditor(customerName, data);
+          break;
+        case 'audit':
+          showAuditEditor(customerName, data);
+          break;
+      }
+    }
+
+    // Show customers editor
+    function showCustomersEditor() {
+      document.getElementById('editor-title').textContent = 'Edit Customers';
+      
+      // Show customers editor, hide others
+      document.getElementById('customers-editor').style.display = 'block';
+      document.getElementById('scorecard-editor').style.display = 'none';
+      document.getElementById('projects-editor').style.display = 'none';
+      document.getElementById('audit-editor').style.display = 'none';
+      
+      // Update the customers editor to focus on name and image
+      document.getElementById('customers-editor').innerHTML = `
+        <div style="margin-bottom: 15px;">
+          <label>Customer Type:</label>
+          <select id="customer-type">
+            <option value="iatf">IATF Customer</option>
+            <option value="non-iatf">Non-IATF Customer</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Customer Name:</label>
+          <input type="text" id="customer-name" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Customer Image:</label>
+          <input type="file" id="customer-image" accept="image/*" required>
+        </div>
+        <button id="add-customer-btn">Add Customer</button>
+        <div id="customers-list" style="margin-top: 20px; max-height: 300px; overflow-y: auto;"></div>
+      `;
+      
+      // Load existing customers
+      loadCustomersList();
+      
+      // Setup add customer button
+      document.getElementById('add-customer-btn').onclick = function() {
+        const type = document.getElementById('customer-type').value;
+        const name = document.getElementById('customer-name').value;
+        const imageFile = document.getElementById('customer-image').files[0];
+        
+        if(name && imageFile) {
+          // Here you would normally upload the image and get the URL
+          // For demo purposes, we'll just use the file name
+          const logoFilename = imageFile.name;
+          addCustomer(type, name, logoFilename);
+          document.getElementById('customer-name').value = '';
+          document.getElementById('customer-image').value = '';
+          loadCustomersList();
+        } else {
+          alert('Please provide both customer name and image');
+        }
+      };
+      
+      // Show modal
+      document.getElementById('admin-editor-modal').style.display = 'block';
+    }
+
+    // Load customers list
+    function loadCustomersList() {
+      const listContainer = document.getElementById('customers-list');
+      listContainer.innerHTML = '';
+      
+      const allData = JSON.parse(localStorage.getItem('customerData') || '{}');
+      
+      // Add IATF customers
+      const iatfSection = document.querySelector('#home-page .customer-section:nth-child(1) .customer-grid');
+      const iatfCustomers = Array.from(iatfSection.querySelectorAll('.customer-card')).map(card => ({
+        name: card.querySelector('.customer-name').textContent,
+        logo: card.querySelector('.customer-logo').src.split('/').pop()
+      }));
+      
+      // Add Non-IATF customers
+      const nonIatfSection = document.querySelector('#home-page .customer-section:nth-child(2) .customer-grid');
+      const nonIatfCustomers = Array.from(nonIatfSection.querySelectorAll('.customer-card')).map(card => ({
+        name: card.querySelector('.customer-name').textContent,
+        logo: card.querySelector('.customer-logo').src.split('/').pop()
+      }));
+      
+      // Add to list
+      iatfCustomers.forEach(customer => {
+        addCustomerToEditorList('iatf', customer.name, customer.logo);
+      });
+      
+      nonIatfCustomers.forEach(customer => {
+        addCustomerToEditorList('non-iatf', customer.name, customer.logo);
+      });
+    }
+
+    // Add customer to editor list
+    function addCustomerToEditorList(type, name, logo) {
+      const listContainer = document.getElementById('customers-list');
+      
+      const item = document.createElement('div');
+      item.style.display = 'flex';
+      item.style.justifyContent = 'space-between';
+      item.style.alignItems = 'center';
+      item.style.padding = '10px';
+      item.style.borderBottom = '1px solid #eee';
+      
+      item.innerHTML = `
+        <div>
+          <strong>${name}</strong> (${type === 'iatf' ? 'IATF' : 'Non-IATF'})<br>
+          <small>Logo: ${logo}</small>
+        </div>
+        <button class="remove-customer-btn" data-name="${name}">Remove</button>
+      `;
+      
+      listContainer.appendChild(item);
+      
+      // Add remove handler
+      item.querySelector('.remove-customer-btn').onclick = function() {
+        removeCustomer(name);
+        loadCustomersList();
+      };
+    }
+
+    // Add new customer
+    function addCustomer(type, name, logo) {
+      const section = type === 'iatf' ? 
+        document.querySelector('#home-page .customer-section:nth-child(1) .customer-grid') :
+        document.querySelector('#home-page .customer-section:nth-child(2) .customer-grid');
+      
+      const card = document.createElement('a');
+      card.className = 'customer-card';
+      card.href = '#';
+      card.onclick = function() { showCustomerOverview(name, logo); return false; };
+      
+      card.innerHTML = `
+        <img src="${logo}" alt="${name} Logo" class="customer-logo">
+        <div class="customer-name">${name}</div>
+      `;
+      
+      section.appendChild(card);
+    }
+
+    // Remove customer
+    function removeCustomer(name) {
+      // Remove from both sections
+      const cards = document.querySelectorAll('.customer-card');
+      cards.forEach(card => {
+        if(card.querySelector('.customer-name').textContent === name) {
+          card.remove();
+        }
+      });
+      
+      // Remove from storage
+      const allData = JSON.parse(localStorage.getItem('customerData') || '{}');
+      delete allData[name];
+      localStorage.setItem('customerData', JSON.stringify(allData));
+    }
+
+    // Show scorecard editor - updated to focus on month/year and PDF
+    function showScorecardEditor(customerName, data) {
+      document.getElementById('editor-title').textContent = `Edit ${customerName} Scorecard`;
+      
+      // Show scorecard editor, hide others
+      document.getElementById('customers-editor').style.display = 'none';
+      document.getElementById('scorecard-editor').style.display = 'block';
+      document.getElementById('projects-editor').style.display = 'none';
+      document.getElementById('audit-editor').style.display = 'none';
+      
+      // Update the scorecard editor to focus on month, year, and PDF
+      document.getElementById('scorecard-editor').innerHTML = `
+        <div style="margin-bottom: 15px;">
+          <label>Month:</label>
+          <select id="scorecard-month">
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May">May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October">October</option>
+            <option value="November">November</option>
+            <option value="December">December</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Year:</label>
+          <select id="scorecard-year">
+            ${generateYearOptions()}
+          </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label>Upload Scorecard PDF:</label>
+          <input type="file" id="scorecard-pdf" accept=".pdf" required>
+        </div>
+      `;
+      
+      // Populate with existing data if available
+      if(data) {
+        if(data.month) document.getElementById('scorecard-month').value = data.month;
+        if(data.year) document.getElementById('scorecard-year').value = data.year;
+      }
+      
+      // Setup save handler
+      document.getElementById('save-edit-btn').onclick = function() {
+        const pdfFile = document.getElementById('scorecard-pdf').files[0];
+        
+        if(pdfFile) {
+          const updatedData = {
+            month: document.getElementById('scorecard-month').value,
+            year: document.getElementById('scorecard-year').value,
+            pdfFileName: pdfFile.name,
+            lastUpdated: new Date().toISOString()
+          };
+          
+          saveCustomerData(customerName, 'scorecard', updatedData);
+          closeEditor();
+          
+          // Update UI to reflect changes
+          const scorecardImage = document.querySelector('#customer-scorecard .dashboard-image');
+          if(scorecardImage) {
+            // This is just a visual update - in a real implementation, you'd show the actual PDF
+            scorecardImage.alt = `${customerName} Scorecard - ${updatedData.month} ${updatedData.year}`;
+          }
+          
+          alert(`Scorecard updated for ${customerName} - ${updatedData.month} ${updatedData.year}`);
+        } else {
+          alert('Please select a PDF file');
+        }
+      };
+      
+      // Show modal
+      document.getElementById('admin-editor-modal').style.display = 'block';
+    }
+
+    // Generate year options function (helper)
+    function generateYearOptions() {
+      const currentYear = new Date().getFullYear();
+      let options = '';
+      
+      for(let year = currentYear; year >= currentYear - 10; year--) {
+        options += `<option value="${year}">${year}</option>`;
+      }
+      
+      return options;
+    }
+
+    // Close editor modal
+    function closeEditor() {
+      document.getElementById('admin-editor-modal').style.display = 'none';
+    }
+
+    // Show projects editor with enhanced PDF upload
+    function showProjectsEditor(customerName, data) {
+      document.getElementById('editor-title').textContent = `Edit ${customerName} Project Updates`;
+      
+      // Show projects editor, hide others
+      document.getElementById('customers-editor').style.display = 'none';
+      document.getElementById('scorecard-editor').style.display = 'none';
+      document.getElementById('projects-editor').style.display = 'block';
+      document.getElementById('audit-editor').style.display = 'none';
+      
+      // Update projects editor to focus on PDF upload
+      document.getElementById('projects-editor').innerHTML = `
+        <div style="margin-bottom: 20px;">
+          <p style="margin-bottom: 10px;">Upload project update report as PDF (max 10MB):</p>
+          <input type="file" id="projects-pdf" accept=".pdf" required>
+          <div id="projects-upload-progress" style="margin-top: 5px; display: none;">
+            <progress value="0" max="100" style="width: 100%;"></progress>
+            <p id="projects-upload-status" style="text-align: center; font-size: 12px;"></p>
+          </div>
+        </div>
+        <div id="projects-report-history" style="margin-top: 20px;">
+          <h4>Current Project Update</h4>
+          <div id="projects-current-file" style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
+            ${data && data.pdfFileName ? 
+              `<p>File: ${data.pdfFileName}<br>
+              <small>Uploaded: ${new Date(data.lastUpdated).toLocaleDateString()}</small></p>
+              <button onclick="viewPDF('${customerName}', 'projects')" style="margin-top:5px; padding:2px 5px; background:#0066cc; color:white; border:none; border-radius:3px;">View</button>
+              <button onclick="downloadPDF('${customerName}', 'projects')" style="margin-left:5px; padding:2px 5px; background:#4CAF50; color:white; border:none; border-radius:3px;">Download</button>` 
+              : 'No project update file uploaded yet'}
+          </div>
+        </div>
+      `;
+      
+      // Populate with existing reports if available
+      const reportsList = document.getElementById('project-reports-list');
+      if(data && data.reports && data.reports.length > 0) {
+        data.reports.forEach(report => {
+          const li = document.createElement('li');
+          li.style.padding = '8px';
+          li.style.borderBottom = '1px solid #eee';
+          li.innerHTML = `
+            <span>${report.fileName}</span>
+            <span style="float:right; color:#888;">Uploaded: ${new Date(report.uploadDate).toLocaleDateString()}</span>
+          `;
+          reportsList.appendChild(li);
+        });
+      } else {
+        reportsList.innerHTML = '<li style="padding:8px; color:#888;">No reports uploaded yet</li>';
+      }
+      
+      // Setup save handler
+      document.getElementById('save-edit-btn').onclick = async function() {
+  const reportFile = document.getElementById('audit-report').files[0];
+  
+  if(reportFile) {
+    // Get existing data or initialize empty structure
+    const existingData = getCustomerData(customerName, 'audit') || { reports: [] };
+    
+    // Add new report
+    existingData.reports.unshift({
+      fileName: reportFile.name,
+      uploadDate: new Date().toISOString(),
+      fileSize: Math.round(reportFile.size / 1024) + ' KB'
+    });
+    
+    // Simulate upload progress
+    const progressBar = document.querySelector('#audit-upload-progress progress');
+    const statusText = document.getElementById('audit-upload-status');
+    const progressContainer = document.getElementById('audit-upload-progress');
+    
+    progressContainer.style.display = 'block';
+    statusText.textContent = 'Uploading...';
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      progressBar.value = progress;
+      statusText.textContent = `Uploading... ${progress}%`;
+      
+      if(progress >= 100) {
+        clearInterval(interval);
+        statusText.textContent = 'Upload complete!';
+        
+        saveCustomerData(customerName, 'audit', existingData);
+        
+        // Update the audit UI
+        const auditImage = document.querySelector('#customer-audit .dashboard-image');
+        if(auditImage) {
+          auditImage.alt = `${customerName} Audit Report - ${reportFile.name}`;
+        }
+        
+        // Show preview and download options
+        const previewContainer = document.getElementById('audit-preview-container');
+        const pdfPreview = document.getElementById('audit-pdf-preview');
+        previewContainer.style.display = 'block';
+        pdfPreview.src = URL.createObjectURL(reportFile);
+        
+        // Store file reference for download
+        function readFileAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+      }
+    }, 200);
+  } else {
+    alert('Please select a PDF file');
+  }
+};
+     // Show modal
+      document.getElementById('admin-editor-modal').style.display = 'block';
+    }
+    
+    // Add project to editor list
+    function addProjectToEditor(project) {
+      const list = document.getElementById('projects-list');
+      const item = document.createElement('div');
+      item.className = 'project-item';
+      item.dataset.name = project.name;
+      item.dataset.status = project.status;
+      item.dataset.timeline = project.timeline;
+      item.dataset.reportFile = project.reportFile;
+      
+      item.innerHTML = `
+        <div style="margin-bottom: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
+          <strong>${project.name}</strong><br>
+          Status: ${project.status}<br>
+          Timeline: ${project.timeline}<br>
+          Report: ${project.reportFile || 'None'}
+          <button onclick="this.parentElement.parentElement.remove()" style="float: right;">Remove</button>
+        </div>
+      `;
+      
+      list.appendChild(item);
+    }
+    
+    // Show audit editor with enhanced PDF upload
+    function showAuditEditor(customerName, data) {
+      document.getElementById('editor-title').textContent = `Edit ${customerName} Audit Status`;
+      
+      // Show audit editor, hide others
+      document.getElementById('customers-editor').style.display = 'none';
+      document.getElementById('scorecard-editor').style.display = 'none';
+      document.getElementById('projects-editor').style.display = 'none';
+      document.getElementById('audit-editor').style.display = 'block';
+      
+      // Update audit editor to focus on PDF upload
+      document.getElementById('audit-editor').innerHTML = `
+        <div style="margin-bottom: 20px;">
+          <p style="margin-bottom: 10px;">Upload audit status report as PDF (max 10MB):</p>
+          <input type="file" id="audit-pdf" accept=".pdf" required>
+          <div id="audit-upload-progress" style="margin-top: 5px; display: none;">
+            <progress value="0" max="100" style="width: 100%;"></progress>
+            <p id="audit-upload-status" style="text-align: center; font-size: 12px;"></p>
+          </div>
+        </div>
+        <div id="audit-report-history" style="margin-top: 20px;">
+          <h4>Current Audit Status Report</h4>
+          <div id="audit-current-file" style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
+            ${data && data.pdfFileName ? 
+              `<p>File: ${data.pdfFileName}<br>
+              <small>Uploaded: ${new Date(data.lastUpdated).toLocaleDateString()}</small></p>
+              <button onclick="viewPDF('${customerName}', 'audit')" style="margin-top:5px; padding:2px 5px; background:#0066cc; color:white; border:none; border-radius:3px;">View</button>
+              <button onclick="downloadPDF('${customerName}', 'audit')" style="margin-left:5px; padding:2px 5px; background:#4CAF50; color:white; border:none; border-radius:3px;">Download</button>` 
+              : 'No audit status file uploaded yet'}
+          </div>
+        </div>
+      `;
+      
+      // Populate with existing audit reports if available
+      const reportsList = document.getElementById('audit-reports-list');
+      if(data && data.reports && data.reports.length > 0) {
+        data.reports.forEach(report => {
+          const li = document.createElement('li');
+          li.style.padding = '8px';
+          li.style.borderBottom = '1px solid #eee';
+          li.innerHTML = `
+            <span>${report.fileName}</span>
+            <span style="float:right; color:#888;">Uploaded: ${new Date(report.uploadDate).toLocaleDateString()}</span>
+          `;
+          reportsList.appendChild(li);
+        });
+      } else {
+        reportsList.innerHTML = '<li style="padding:8px; color:#888;">No audit reports uploaded yet</li>';
+      }
+      
+      // Setup save handler
+  document.getElementById('save-edit-btn').onclick = async function() {
+  const reportFile = document.getElementById('audit-report').files[0];
+  }
+  if(reportFile) {
+    // Get existing data or initialize empty structure
+    const existingData = getCustomerData(customerName, 'audit') || { reports: [] };
+    
+    // Add new report
+    existingData.reports.unshift({
+      fileName: reportFile.name,
+      uploadDate: new Date().toISOString(),
+      fileSize: Math.round(reportFile.size / 1024) + ' KB'
+    });
+    
+    // Simulate upload progress
+    const progressBar = document.querySelector('#audit-upload-progress progress');
+    const statusText = document.getElementById('audit-upload-status');
+    const progressContainer = document.getElementById('audit-upload-progress');
+    
+    progressContainer.style.display = 'block';
+    statusText.textContent = 'Uploading...';
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      progressBar.value = progress;
+      statusText.textContent = `Uploading... ${progress}%`;
+      
+      if(progress >= 100) {
+        clearInterval(interval);
+        statusText.textContent = 'Upload complete!';
+        
+        saveCustomerData(customerName, 'audit', existingData);
+        
+        // Update the audit UI
+        const auditImage = document.querySelector('#customer-audit .dashboard-image');
+        if(auditImage) {
+          auditImage.alt = `${customerName} Audit Report - ${reportFile.name}`;
+        }
+        
+        // Show preview and download options
+        const previewContainer = document.getElementById('audit-preview-container');
+        const pdfPreview = document.getElementById('audit-pdf-preview');
+        previewContainer.style.display = 'block';
+        pdfPreview.src = URL.createObjectURL(reportFile);
+        
+        // Store file reference for download
+        function readFileAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+  }
+      }
+    }, 200);
+  } else {
+    alert('Please select a PDF file');
+  }
+};
+    // Add audit to editor list
+    function addAuditToEditor(audit) {
+      const list = document.getElementById('recent-audits-list');
+      const item = document.createElement('div');
+      item.className = 'audit-item';
+      item.dataset.date = audit.date;
+      item.dataset.type = audit.type;
+      item.dataset.status = audit.status;
+      item.dataset.reportFile = audit.reportFile;
+      
+      item.innerHTML = `
+        <div style="margin-bottom: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
+          <strong>${audit.date}</strong><br>
+          Type: ${audit.type}<br>
+          Status: ${audit.status}<br>
+          Report: ${audit.reportFile || 'None'}
+          <button onclick="this.parentElement.parentElement.remove()" style="float: right;">Remove</button>
+        </div>
+      `;
+      
+      list.appendChild(item);
+    }
+    
+    // Helper function to read file as array buffer
+    function readFileAsArrayBuffer(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    // Download project report
+    function downloadProjectReport() {
+      const reportData = JSON.parse(localStorage.getItem('currentProjectReport'));
+      if (reportData) {
+        const blob = new Blob([new Uint8Array(reportData.data)], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = reportData.name;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    // Download audit report
+    function downloadAuditReport() {
+      const reportData = JSON.parse(localStorage.getItem('currentAuditReport'));
+      if (reportData) {
+        const blob = new Blob([new Uint8Array(reportData.data)], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = reportData.name;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    // Initialize app
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add PDF upload button to admin sections
+      const adminSections = ['customer-overview', 'customer-scorecard', 'customer-projects', 'customer-audit'];
+      adminSections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+          const uploadBtn = document.createElement('button');
+          uploadBtn.textContent = 'Upload PDF';
+          uploadBtn.className = 'admin-only download-btn';
+          uploadBtn.style.display = isAdmin ? 'block' : 'none';
+          uploadBtn.onclick = showPDFUploadModal;
+          
+          const container = section.querySelector('.container');
+          if (container) {
+            const h2 = container.querySelector('h2');
+            if (h2) {
+              h2.after(uploadBtn);
+            }
+          }
+        }
+      });
+
+      // Add PDF file size validation
+      document.getElementById('pdf-file-input').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && file.size > 10 * 1024 * 1024) { // 10MB limit
+          alert('File size exceeds 10MB limit');
+          e.target.value = '';
+        }
+      });
+
+      // Add file size validation
+      document.getElementById('project-report').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && file.size > 10 * 1024 * 1024) { // 10MB limit
+          alert('File size exceeds 10MB limit');
+          e.target.value = '';
+        }
+      });
+
+      document.getElementById('audit-report').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && file.size > 10 * 1024 * 1024) { // 10MB limit
+          alert('File size exceeds 10MB limit');
+          e.target.value = '';
+        }
+      });
+      initializeCustomerData();
+      
+      // Setup cancel button
+      document.getElementById('cancel-edit-btn').onclick = closeEditor;
+      
+      // Add admin edit buttons to each section
+      const sections = ['customers', 'scorecard', 'projects', 'audit'];
+      
+      // Add edit buttons to all pages
+      sections.forEach(section => {
+        const pageId = section === 'customers' ? 'home-page' : `customer-${section}`;
+        const page = document.getElementById(pageId);
+        
+        if(page) {
+          const container = page.querySelector('.container');
+          const editButton = document.createElement('button');
+          editButton.textContent = section === 'customers' ? 'Edit Customers' : 'Edit Data';
+          editButton.className = 'admin-only download-btn';
+          editButton.style.display = 'none';
+          if(section === 'customers') {
+            editButton.style.margin = '20px 0';
+          }
+          editButton.onclick = function() { showAdminEditor(section); };
+          
+          if(section === 'customers') {
+            container.insertBefore(editButton, container.firstChild);
+          } else {
+            const h2 = container.querySelector('h2');
+            if(h2) {
+              h2.after(editButton);
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html> 
