@@ -6,20 +6,20 @@
 
 ## 📌 Overview
 
-**Customer Scorecard & Insights** is a fully self-contained, browser-based quality tracking tool built for Bosch. It provides a centralized interface to monitor and manage customer performance data across scorecards, project updates, and audit reports — with no backend infrastructure required.
+**Customer Scorecard & Insights** is a fully self-contained, browser-based quality tracking tool built for Bosch. It provides a centralized interface to monitor and manage customer performance data across scorecards, project updates, and audit reports with no backend infrastructure required.
 
 ---
 
 ## ✨ Features
 
-- 🏢 **Multi-Customer Dashboard** — Supports IATF and Non-IATF customer categories
-- 📋 **Scorecard View** — Filter by vendor code, view ratings (A–D), and upload PDF scorecards
-- 📁 **Project Updates** — Track project name, status, timeline, and attach report files
-- ✅ **Audit Status** — Log audit dates, types, OPL completion counts, and upload audit PDFs
-- 🔐 **Admin Login** — Role-based authentication reveals hidden edit controls
-- 📤 **PDF Upload & Preview** — Upload PDFs with progress bar simulation and inline iframe preview
-- 💾 **Data Persistence** — Customer data stored and reloaded via `localStorage`
-- 📱 **Responsive Layout** — CSS Grid & Flexbox with media query breakpoints
+- 🏢 **Multi-Customer Dashboard** : Supports IATF and Non-IATF customer categories
+- 📋 **Scorecard View** : Filter by vendor code, view ratings (A–D), and upload PDF scorecards
+- 📁 **Project Updates** : Track project name, status, timeline, and attach report files
+- ✅ **Audit Status** : Log audit dates, types, OPL completion counts, and upload audit PDFs
+- 🔐 **Admin Login** : Role-based authentication reveals hidden edit controls
+- 📤 **PDF Upload & Preview** : Upload PDFs with progress bar simulation and inline iframe preview
+- 💾 **Data Persistence** : Customer data stored and reloaded via `localStorage`
+- 📱 **Responsive Layout** : CSS Grid & Flexbox with media query breakpoints
 
 ---
 
@@ -55,8 +55,8 @@ project/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Any modern web browser (Chrome, Edge, Firefox, Safari)
-- No installations, servers, or dependencies required
+* Any modern web browser (Chrome, Edge, Firefox, Safari)
+* No installations, servers, or dependencies required
 
 ### Running the App
 1. Clone or download the project folder
@@ -120,10 +120,10 @@ Click the **Login** button in the navbar to access the admin panel.
 5. File metadata (name, date, size) is saved to `localStorage`
 
 ### Data Management
-- `saveCustomerData(customerName, section, data)` — Persists data to localStorage
-- `getCustomerData(customerName, section)` — Retrieves stored data
-- `loadCustomerData(customerName)` — Loads all sections on customer navigation
-- `initializeCustomerData()` — Seeds default structure on first load
+* `saveCustomerData(customerName, section, data)` : Persists data to localStorage
+* `getCustomerData(customerName, section)` : Retrieves stored data
+* `loadCustomerData(customerName)` : Loads all sections on customer navigation
+* `initializeCustomerData()` : Seeds default structure on first load
 
 ---
 
@@ -138,19 +138,19 @@ Click the **Login** button in the navbar to access the admin panel.
 
 ## ⚠️ Known Limitations
 
-- PDF file contents are **not** permanently stored in localStorage (only metadata is saved); actual files are session-based via `URL.createObjectURL()`
-- Admin credentials should be secured server-side for production use
-- No backend or database — all data resets on browser cache clear
+* PDF file contents are **not** permanently stored in localStorage (only metadata is saved); actual files are session-based via `URL.createObjectURL()`
+* Admin credentials should be secured server-side for production use
+* No backend or database — all data resets on browser cache clear
 
 ---
 
 ## 🔮 Future Improvements
 
-- [ ] Backend integration (Node.js / Firebase) for persistent file storage
-- [ ] Export scorecard data as Excel or PDF report
-- [ ] Email notifications for audit deadlines
-- [ ] Search and filter across all customers
-- [ ] Dark mode support
+* [ ] Backend integration (Node.js / Firebase) for persistent file storage
+* [ ] Export scorecard data as Excel or PDF report
+* [ ] Email notifications for audit deadlines
+* [ ] Search and filter across all customers
+* [ ] Dark mode support
 
 ---
 
