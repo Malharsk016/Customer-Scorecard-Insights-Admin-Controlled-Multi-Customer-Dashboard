@@ -1,6 +1,6 @@
 # 📊 Customer Scorecard & Insights
 
-> A Bosch-branded, single-page web dashboard for managing IATF & Non-IATF customer scorecards, project updates, and audit reports — with admin-controlled data editing and PDF report management.
+> A Bosch-branded, single-page web dashboard for managing IATF & Non-IATF customer scorecards, project updates, and audit reports with admin-controlled data editing and PDF report management.
 
 ---
 
